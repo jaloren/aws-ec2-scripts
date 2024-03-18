@@ -56,13 +56,14 @@ function install_tailscale() {
 }
 
 function configure_tailscale_ssh() {
-  local override_file=/etc/systemd/system/tailscaled.service.d/override.conf
-  if [[ -s "${override_file}" ]]; then
+  local override_dir=/etc/systemd/system/tailscaled.service.d
+  if [[ -d "${override_dir}" ]]; then
     logInfo "tailscale has already been configured to enable ssh so skipping configuration process"
     return 0
   fi
+  mkdir -p "${override_dir}" || return 1
 
-  cat <<EOF >/etc/systemd/system/tailscaled.service.d/override.conf
+  cat <<EOF >"${override_dir}/override.conf"
 [Service]
 ExecStartPost=/usr/local/bin/aws-ec2-scripts/tailscale/tailscale-init-ssh.sh
 EOF
