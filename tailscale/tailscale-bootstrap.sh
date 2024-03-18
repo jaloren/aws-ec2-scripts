@@ -32,8 +32,9 @@ function install_aws() {
     return 0
   fi
   logInfo "install aws cli"
-  apt-get update || return 1
-  apt-get install unzip || return 1
+  if ! is_installed unzip; then
+    apt-get install --no-install-recommends -y unzip || return 1
+  fi
   local url="https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"
   curl --fail "${url}" -o "awscliv2.zip" || return 1
   unzip -q awscliv2.zip || return 1
@@ -68,6 +69,9 @@ EOF
   systemctl daemon-reload
   systemctl restart tailscaled
 }
+
+export DEBIAN_FRONTEND=noninteractive
+apt-get update || exit 1
 
 if ! install_aws; then
   logErr "failed to install the aws cli"
